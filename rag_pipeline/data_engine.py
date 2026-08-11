@@ -43,7 +43,12 @@ class CAGDataEngine:
             }
         ]
 
-        self.cag_cache = {}
+        # CAG Strategy: Pre-build the entire knowledge corpus into memory
+        self.preloaded_cag_context = [
+            f"Topic: {row['topic']} | Sector: {row['sector']} | Content: {row['content']}"
+            for row in self.market_data
+        ]
+
         self._init_duckdb()
         self._init_vector_store()
 
@@ -63,11 +68,17 @@ class CAGDataEngine:
         self.vector_store = FAISS.from_documents(documents, embeddings)
         self.retriever = self.vector_store.as_retriever(search_kwargs={"k": 2})
 
-    def query_cag_or_retrieve(self, query: str):
-        if query in self.cag_cache:
-            return self.cag_cache[query]
+    def query_cag_or_retrieve(self, query: str, use_cag: bool = True) -> list[str]:
+        """
+        Main interface method used across the pipeline.
 
+        - If use_cag=True: Serves the full pre-loaded in-memory context (CAG paradigm).
+        - If use_cag=False: Bypasses CAG and falls back to FAISS vector search (RAG paradigm).
+        """
+        if use_cag:
+            # Serves pre-loaded in-memory knowledge directly (True CAG)
+            return self.preloaded_cag_context
+
+        # Vector Store Fallback (RAG)
         docs = self.retriever.invoke(query)
-        result = [d.page_content for d in docs]
-        self.cag_cache[query] = result
-        return result
+        return [d.page_content for d in docs]
