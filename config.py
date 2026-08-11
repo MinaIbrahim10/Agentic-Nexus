@@ -11,7 +11,8 @@ os.environ["LANGCHAIN_TRACING_V2"] = "false"
 llm = ChatOllama(
     model="gemma4:e4b-it",
     temperature=0,
-    keep_alive="15m"
+    keep_alive="15m",
+    num_ctx=8192,
 )
 
 # Initialize Local Embedding Model
