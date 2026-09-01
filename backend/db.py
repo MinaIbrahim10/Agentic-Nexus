@@ -30,8 +30,20 @@ def initialize_database() -> None:
     with connect() as con:
         con.execute(
             """
+            CREATE TABLE IF NOT EXISTS users (
+                id VARCHAR PRIMARY KEY,
+                email VARCHAR UNIQUE NOT NULL,
+                password_hash VARCHAR NOT NULL,
+                created_at TIMESTAMP NOT NULL
+            )
+            """
+        )
+
+        con.execute(
+            """
             CREATE TABLE IF NOT EXISTS query_runs (
                 id VARCHAR PRIMARY KEY,
+                user_id VARCHAR NOT NULL,
                 query TEXT NOT NULL,
                 status VARCHAR NOT NULL,
                 created_at TIMESTAMP NOT NULL
@@ -41,16 +53,25 @@ def initialize_database() -> None:
 
 
 def database_is_ready() -> bool:
-    with connect() as con:
-        result = con.execute(
-            """
-            SELECT COUNT(*)
-            FROM information_schema.tables
-            WHERE table_name = 'query_runs'
-            """
-        ).fetchone()
+    required = {
+        "users",
+        "query_runs",
+    }
 
-    return bool(
-        result
-        and result[0] == 1
+    with connect() as con:
+        rows = con.execute(
+            """
+            SELECT table_name
+            FROM information_schema.tables
+            WHERE table_schema = 'main'
+            """
+        ).fetchall()
+
+    existing = {
+        row[0]
+        for row in rows
+    }
+
+    return required.issubset(
+        existing
     )
