@@ -30,10 +30,23 @@ security = HTTPBearer()
 
 
 def jwt_secret() -> str:
-    return os.getenv(
-        "NEXUS_JWT_SECRET",
-        "development-only-change-me",
+    secret = os.getenv(
+        "NEXUS_JWT_SECRET"
     )
+
+    if not secret:
+        raise RuntimeError(
+            "NEXUS_JWT_SECRET is required. "
+            "Run ./scripts/setup.sh or configure .env."
+        )
+
+    if len(secret) < 32:
+        raise RuntimeError(
+            "NEXUS_JWT_SECRET must be at least "
+            "32 characters long."
+        )
+
+    return secret
 
 
 def hash_password(

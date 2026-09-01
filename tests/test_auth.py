@@ -203,3 +203,35 @@ def test_duplicate_email_returns_409(
 
     assert first.status_code == 201
     assert second.status_code == 409
+
+
+def test_jwt_secret_must_be_configured(
+    monkeypatch,
+):
+    import pytest
+
+    from backend.auth import (
+        jwt_secret,
+    )
+
+    monkeypatch.delenv(
+        "NEXUS_JWT_SECRET",
+        raising=False,
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="NEXUS_JWT_SECRET is required",
+    ):
+        jwt_secret()
+
+    monkeypatch.setenv(
+        "NEXUS_JWT_SECRET",
+        "too-short",
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="at least 32 characters",
+    ):
+        jwt_secret()
