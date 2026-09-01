@@ -67,8 +67,8 @@ The system:
 7. evaluates the result before returning it;
 8. records persistent operational data for later inspection.
 
-Slow work such as document ingestion and indexing will run through background
-jobs rather than blocking HTTP requests.
+Document ingestion and normalization run through persisted background job
+records rather than being performed inside the initial HTTP response.
 
 ## Program Concepts
 
@@ -99,8 +99,24 @@ The existing system also contains:
 - local Ollama models
 - web fallback for low-confidence retrieval
 
-The capstone hardening phase will additionally add deterministic tests,
-containerized startup, explicit evidence, and reproducible benchmark results.
+The capstone hardening adds deterministic tests, explicit benchmark evidence,
+and reproducible setup, run, seed, and demo scripts.
+
+
+## Run and Demo
+
+After cloning the public repository, the documented setup/start path is:
+
+1. `./scripts/setup.sh`
+2. `./scripts/run_api.sh`
+
+The setup uses Python 3.13 and local Ollama, creates an ignored `.env` with a
+random JWT secret, installs the project dependencies, and checks the required
+local models.
+
+With the API running, `./scripts/demo.sh` executes the documented five-minute
+demo path covering health, authentication, persistence, background ingestion,
+a real local Ollama call, and usage logging.
 
 ## Explicit Non-Goal
 

@@ -1,10 +1,22 @@
-venv/
-__pycache__/
-*.pyc
-.env
-*.duckdb
-.chroma/
-.env
-config.py
-
+# Python environments
 .venv/
+venv/
+
+# Python generated files
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# Local configuration / secrets
+.env
+
+# Runtime data
+*.duckdb
+data/*.duckdb
+*.log
+
+# Local vector-store artifacts
+.chroma/
