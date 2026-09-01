@@ -5,7 +5,7 @@ A local-first multi-agent RAG (Retrieval-Augmented Generation) pipeline built wi
 Two mechanisms sit at the core of this architecture:
 
 - **LAG (Language Agent Grammars)** — every inter-agent decision (the Manager's task routing plan) is forced through a Pydantic schema (`OrchestratorPlan` / `SubTask`), not free-form text. This eliminates the class of failures where one agent hands another malformed or unparseable output, and makes the routing decision itself a structured, inspectable object instead of a guess extracted from prose.
-- **CAG (Cache-Augmented Generation)** — before any retrieval work happens, the data engine checks an in-memory query→result cache. Repeat or near-duplicate queries skip FAISS search and Cross-Encoder reranking entirely, cutting latency and redundant compute on any query the system has already answered in the current run.
+- **CAG (Cache-Augmented Generation)** — before any retrieval work happens, the Hybrid RAG path checks a bounded in-memory normalized query→result cache owned by the data engine. Exact normalized repeats skip FAISS retrieval, knowledge-graph lookup, Cross-Encoder reranking, and fallback selection for results already computed in the current process.
 
 On top of these, the system dynamically evaluates retrieval confidence using **CRAG (Corrective RAG)** with a local Cross-Encoder reranker, and combines vector search with a NetworkX knowledge graph for multi-hop context.
 
@@ -82,7 +82,7 @@ flowchart TD
 ## Key Execution Stages
 
 - **Manager Router — LAG in action** (`manager_node`): The Manager doesn't return free text — it returns a Pydantic-validated `OrchestratorPlan` with typed `SubTask` objects (`assigned_agent: Literal["HybridRAG", "CoderExecution", "DirectAnswer"]`). The graph reads this structured plan directly to route to `direct_answer`, `rag_only`, `coder_only`, or `full_pipeline` — routing is a real branch driven by a schema, not a fixed pipeline or a regex over LLM prose.
-- **CAG cache layer** (`CAGDataEngine.query_cag_or_retrieve`): Before touching FAISS, checks an in-memory query→result cache and returns immediately on a repeat query, avoiding redundant embedding + reranking work. Currently process-local (resets on restart) — a natural next step is swapping this for Redis if it needs to survive restarts or run across multiple workers.
+- **CAG cache layer** (`run_hybrid_rag_agent` + `CAGDataEngine.query_cache`): Before touching FAISS or the knowledge graph, the agent checks a bounded normalized query→result cache. A hit returns the previously computed hybrid result and avoids retrieval and reranking. The cache is intentionally process-local and resets on restart; Redis would be the natural distributed replacement.
 - **Hybrid RAG + CRAG Scoring** (`hybrid_rag_node`): On a cache miss, retrieves from FAISS + the knowledge graph, reranks with `BAAI/bge-reranker-large`, sigmoid-normalizes the raw logits, and only triggers web fallback when normalized confidence is genuinely low (`< 0.4`).
 - **Multi-turn state**: `chat_history` is threaded through every node, including the `direct_answer` fast path.
 - **Evaluator + bounded retry**: A failed evaluation triggers exactly one regeneration with feedback injected into the Coder's prompt, capped to prevent infinite loops.
