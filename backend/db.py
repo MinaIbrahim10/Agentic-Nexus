@@ -51,11 +51,44 @@ def initialize_database() -> None:
             """
         )
 
+        con.execute(
+            """
+            CREATE TABLE IF NOT EXISTS background_jobs (
+                id VARCHAR PRIMARY KEY,
+                user_id VARCHAR NOT NULL,
+                kind VARCHAR NOT NULL,
+                title VARCHAR NOT NULL,
+                content TEXT NOT NULL,
+                status VARCHAR NOT NULL,
+                attempts INTEGER NOT NULL,
+                error TEXT,
+                created_at TIMESTAMP NOT NULL,
+                updated_at TIMESTAMP NOT NULL
+            )
+            """
+        )
+
+        con.execute(
+            """
+            CREATE TABLE IF NOT EXISTS knowledge_documents (
+                id VARCHAR PRIMARY KEY,
+                user_id VARCHAR NOT NULL,
+                source_job_id VARCHAR NOT NULL,
+                title VARCHAR NOT NULL,
+                content TEXT NOT NULL,
+                word_count INTEGER NOT NULL,
+                created_at TIMESTAMP NOT NULL
+            )
+            """
+        )
+
 
 def database_is_ready() -> bool:
     required = {
         "users",
         "query_runs",
+        "background_jobs",
+        "knowledge_documents",
     }
 
     with connect() as con:

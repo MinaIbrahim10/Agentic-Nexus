@@ -3,6 +3,7 @@ from contextlib import (
 )
 
 from fastapi import (
+    BackgroundTasks,
     Depends,
     FastAPI,
     HTTPException,
@@ -19,6 +20,9 @@ from backend.db import (
     initialize_database,
 )
 from backend.schemas import (
+    BackgroundJobResponse,
+    IngestRequest,
+    KnowledgeDocumentResponse,
     LoginRequest,
     QueryCreate,
     QueryRun,
@@ -29,6 +33,13 @@ from backend.schemas import (
 from backend.service import (
     create_query_run,
     get_query_run,
+)
+
+from backend.jobs import (
+    create_ingestion_job,
+    get_job,
+    list_documents,
+    process_ingestion_job,
 )
 
 
@@ -159,3 +170,66 @@ def read_query(
         )
 
     return record
+
+
+@app.post(
+    "/api/v1/ingest",
+    response_model=BackgroundJobResponse,
+    status_code=202,
+)
+def ingest_document(
+    payload: IngestRequest,
+    background_tasks: BackgroundTasks,
+    user: dict = Depends(
+        get_current_user
+    ),
+):
+    job = create_ingestion_job(
+        user["id"],
+        payload,
+    )
+
+    background_tasks.add_task(
+        process_ingestion_job,
+        job.id,
+    )
+
+    return job
+
+
+@app.get(
+    "/api/v1/jobs/{job_id}",
+    response_model=BackgroundJobResponse,
+)
+def read_job(
+    job_id: str,
+    user: dict = Depends(
+        get_current_user
+    ),
+):
+    job = get_job(
+        job_id,
+        user["id"],
+    )
+
+    if job is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Background job not found",
+        )
+
+    return job
+
+
+@app.get(
+    "/api/v1/documents",
+    response_model=list[KnowledgeDocumentResponse],
+)
+def read_documents(
+    user: dict = Depends(
+        get_current_user
+    ),
+):
+    return list_documents(
+        user["id"]
+    )

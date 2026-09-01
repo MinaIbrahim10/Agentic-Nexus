@@ -47,3 +47,33 @@ class QueryRun(BaseModel):
     query: str
     status: str
     created_at: datetime
+
+
+class IngestRequest(BaseModel):
+    title: str = Field(
+        min_length=3,
+        max_length=200,
+    )
+    content: str = Field(
+        min_length=10,
+        max_length=50_000,
+    )
+
+
+class BackgroundJobResponse(BaseModel):
+    id: str
+    user_id: str
+    kind: str
+    status: str
+    attempts: int
+    error: str | None = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class KnowledgeDocumentResponse(BaseModel):
+    id: str
+    title: str
+    content: str
+    word_count: int
+    created_at: datetime
