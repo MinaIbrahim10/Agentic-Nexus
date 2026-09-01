@@ -82,6 +82,22 @@ def initialize_database() -> None:
             """
         )
 
+        con.execute(
+            """
+            CREATE TABLE IF NOT EXISTS ai_usage (
+                id VARCHAR PRIMARY KEY,
+                user_id VARCHAR NOT NULL,
+                operation VARCHAR NOT NULL,
+                provider VARCHAR NOT NULL,
+                model VARCHAR NOT NULL,
+                prompt_tokens INTEGER NOT NULL,
+                completion_tokens INTEGER NOT NULL,
+                cost_usd DOUBLE NOT NULL,
+                created_at TIMESTAMP NOT NULL
+            )
+            """
+        )
+
 
 def database_is_ready() -> bool:
     required = {
@@ -89,6 +105,7 @@ def database_is_ready() -> bool:
         "query_runs",
         "background_jobs",
         "knowledge_documents",
+        "ai_usage",
     }
 
     with connect() as con:

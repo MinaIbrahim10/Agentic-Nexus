@@ -20,6 +20,9 @@ from backend.db import (
     initialize_database,
 )
 from backend.schemas import (
+    AIAnswerRequest,
+    AIAnswerResponse,
+    AIUsageResponse,
     BackgroundJobResponse,
     IngestRequest,
     KnowledgeDocumentResponse,
@@ -40,6 +43,11 @@ from backend.jobs import (
     get_job,
     list_documents,
     process_ingestion_job,
+)
+
+from backend.ai_service import (
+    answer_prompt,
+    list_usage,
 )
 
 
@@ -231,5 +239,35 @@ def read_documents(
     ),
 ):
     return list_documents(
+        user["id"]
+    )
+
+
+@app.post(
+    "/api/v1/ai/answer",
+    response_model=AIAnswerResponse,
+)
+def ai_answer(
+    payload: AIAnswerRequest,
+    user: dict = Depends(
+        get_current_user
+    ),
+):
+    return answer_prompt(
+        user_id=user["id"],
+        prompt=payload.prompt,
+    )
+
+
+@app.get(
+    "/api/v1/usage",
+    response_model=list[AIUsageResponse],
+)
+def read_ai_usage(
+    user: dict = Depends(
+        get_current_user
+    ),
+):
+    return list_usage(
         user["id"]
     )

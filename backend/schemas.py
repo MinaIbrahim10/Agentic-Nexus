@@ -77,3 +77,30 @@ class KnowledgeDocumentResponse(BaseModel):
     content: str
     word_count: int
     created_at: datetime
+
+
+class AIAnswerRequest(BaseModel):
+    prompt: str = Field(
+        min_length=3,
+        max_length=4000,
+    )
+
+
+class AIAnswerResponse(BaseModel):
+    answer: str
+    provider: str
+    model: str
+    prompt_tokens: int
+    completion_tokens: int
+    cost_usd: float
+
+
+class AIUsageResponse(BaseModel):
+    id: str
+    operation: str
+    provider: str
+    model: str
+    prompt_tokens: int
+    completion_tokens: int
+    cost_usd: float
+    created_at: datetime
