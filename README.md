@@ -202,3 +202,33 @@ from unstructured text into a validated, typed, deterministic data payload...
 ## 🔍 Observability
 
 All agent calls are wrapped with `@traceable` and reported to LangSmith under the `enterprise-agentic-nexus` project, giving step-by-step visibility into routing decisions, retrieval scores, and evaluator verdicts for every run.
+
+## 📊 Verified CAG 10x Benchmark
+
+The CAG layer was measured against the real Hybrid RAG retrieval path using the
+same query 10 times.
+
+| Metric | Without cache reuse | With CAG |
+|---|---:|---:|
+| FAISS vector retrieval calls | 10 | 1 |
+| Knowledge-graph lookup calls | 10 | 1 |
+| Cross-Encoder reranking calls | 10 | 1 |
+| Total measured latency | 1785.915 ms | 179.878 ms |
+
+**Measured expensive retrieval-work reduction: 10.00x**
+
+**Measured wall-clock retrieval latency speedup: 9.93x**
+
+The first cached scenario request performs the real retrieval pipeline; the
+following nine identical normalized queries are served from the bounded CAG
+query-result cache. Model loading and warm-up were excluded, and web fallback
+was not permitted.
+
+The 10x claim specifically describes the reduction in expensive retrieval
+pipeline executions. It is not presented as a guaranteed 10x wall-clock
+latency improvement.
+
+Reproducible recorded results are stored in:
+
+- `evidence/cache_benchmark.json`
+- `evidence/cache_benchmark.md`

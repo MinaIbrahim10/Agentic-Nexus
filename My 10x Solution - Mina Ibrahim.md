@@ -29,13 +29,24 @@ quality controls.
 
 ## My 10x Claim
 
-The project targets at least a **10x reduction in retrieval work for repeated
-queries** by reusing cached retrieval results instead of repeating embedding,
-vector search, knowledge-graph lookup, and reranking.
+Agentic-Nexus achieves a measured **10.00x reduction in expensive retrieval
+work for repeated identical queries** through its Cache-Augmented Generation
+layer.
 
-This is a target, not yet a measured claim. The final capstone will include a
-before-vs-after benchmark so the 10x statement is supported by recorded
-evidence.
+In a recorded benchmark of 10 repeated queries through the real Hybrid RAG
+path, the uncached scenario executed FAISS vector retrieval, NetworkX
+knowledge-graph lookup, and Cross-Encoder reranking 10 times each. With CAG
+enabled, those same expensive operations executed only once each; the next
+nine requests were cache hits.
+
+The benchmark also measured total retrieval-path latency of **1785.915 ms
+without reuse versus 179.878 ms with CAG**, a measured **9.93x wall-clock
+speedup**. Therefore, the 10x claim refers specifically to reduction in
+expensive retrieval-work executions, not to a guaranteed 10x latency
+improvement.
+
+The recorded evidence is available in `evidence/cache_benchmark.json` and
+`evidence/cache_benchmark.md`.
 
 The broader product goal is to make grounded AI workflows substantially easier
 to inspect and safer to operate than an unconstrained single-LLM pipeline.

@@ -1,0 +1,47 @@
+{
+  "timestamp_utc": "2026-09-01T00:58:33.328827+00:00",
+  "query": "Corrective RAG dynamically evaluates retrieval scores using Cross-Encoders.",
+  "repeated_queries": 10,
+  "retrieval_stack": [
+    "Ollama bge-m3 embeddings",
+    "FAISS vector retrieval",
+    "NetworkX knowledge graph",
+    "BAAI/bge-reranker-large CrossEncoder",
+    "CRAG threshold evaluation"
+  ],
+  "uncached": {
+    "total_ms": 1785.915293,
+    "expensive_calls": {
+      "vector": 10,
+      "graph": 10,
+      "reranker": 10
+    }
+  },
+  "cached": {
+    "total_ms": 179.878237,
+    "expensive_calls": {
+      "vector": 1,
+      "graph": 1,
+      "reranker": 1
+    },
+    "cache_stats": {
+      "entries": 1,
+      "max_entries": 128,
+      "hits": 9,
+      "misses": 1,
+      "hit_rate": 0.9
+    }
+  },
+  "retrieval_work_reduction_x": 10.0,
+  "latency_speedup_x": 9.928,
+  "operation_evidence_valid": true,
+  "achieved_10x_retrieval_work": true,
+  "method": {
+    "model_loading_excluded": true,
+    "warmup_excluded": true,
+    "web_fallback_allowed": false,
+    "real_vector_retrieval": true,
+    "real_graph_lookup": true,
+    "real_cross_encoder": true
+  }
+}
