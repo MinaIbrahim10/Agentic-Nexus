@@ -15,4 +15,4 @@ set -a
 source .env
 set +a
 
-python scripts/seed_demo.py
+python -m scripts.seed_demo

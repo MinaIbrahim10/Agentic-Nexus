@@ -73,3 +73,19 @@ def test_gitignore_covers_local_runtime_artifacts():
 
     for pattern in required:
         assert pattern in ignore
+
+
+def test_seed_demo_runs_as_repo_module():
+    script = (
+        ROOT / "scripts/seed_demo.sh"
+    ).read_text()
+
+    assert (
+        "python -m scripts.seed_demo"
+        in script
+    )
+
+    assert (
+        "python scripts/seed_demo.py"
+        not in script
+    )
